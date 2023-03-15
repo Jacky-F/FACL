@@ -53,7 +53,6 @@ class SeparableConv2d(nn.Module):
         self.pointwise = nn.Conv2d(in_channels,out_channels,1,1,0,1,1,bias=bias)
 
     def forward(self,x):
-        # torch.cuda.empty_cache()
         x = self.conv1(x)
         x = self.pointwise(x)
         return x
@@ -110,7 +109,7 @@ class Block(nn.Module):
         x+=skip
         return x
 
-class ClassBlock(nn.Module):# classify the final result
+class ClassBlock(nn.Module):  # classify the final result
     def __init__(self):
         super().__init__()
         self.c0 = nn.Linear(2048, 1024)
@@ -219,7 +218,6 @@ class Xception(nn.Module):
 
         self.conv2 = nn.Conv2d(32, 64, 3, bias=False)
         self.bn2 = nn.BatchNorm2d(64)
-        # do relu here
 
         self.fam1 = FAM(size=147)
         self.block1 = Block(64, 128, 2, 2, start_with_relu=False, grow_first=True)
@@ -245,7 +243,6 @@ class Xception(nn.Module):
         self.conv3 = SeparableConv2d(1024,1536,3,1,1)
         self.bn3 = nn.BatchNorm2d(1536)
 
-        #do relu here
         self.conv4 = SeparableConv2d(1536,2048,3,1,1)
         self.bn4 = nn.BatchNorm2d(2048)
 
@@ -304,12 +301,12 @@ class Xception(nn.Module):
         y = x
         x = self.dp(x)
         x = self.last_linear(x)
-        return y,x
+        return y, x
 
     def forward(self, input):
         x = self.features(input)
-        y,x = self.logits(x)
-        return y,x
+        y, x = self.logits(x)
+        return y, x
 
 
 def get_xception(num_classes=1000, pretrained='imagenet'):
@@ -327,7 +324,6 @@ def get_xception(num_classes=1000, pretrained='imagenet'):
             if 'pointwise' in name:
                 state_dict[name] = weights.unsqueeze(-1).unsqueeze(-1)
         state_dict = {k:v for k, v in state_dict.items() if 'fc' not in k}
-        # print(state_dict)
         model.load_state_dict(state_dict, False)
 
         model.input_space = settings['input_space']
@@ -336,7 +332,6 @@ def get_xception(num_classes=1000, pretrained='imagenet'):
         model.mean = settings['mean']
         model.std = settings['std']
 
-    # TODO: ugly
     model.last_linear = model.fc
     del model.fc
     return model

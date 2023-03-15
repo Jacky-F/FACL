@@ -16,7 +16,7 @@ parser.add_argument('--w2', type=int, default=10)
 parser.add_argument('--gpu', type=str, default='1')
 parser.add_argument('--compress', type=str, default='c40')  # ['raw','c23','c40]
 parser.add_argument('--bz', type=int, default=64)
-parser.add_argument('--pretrained_path', type=str, default='../outputs/xception-b5690688.pth')
+parser.add_argument('--pretrained_path', type=str, default='./outputs/xception-b5690688.pth')
 parser.add_argument('--epoch', type=int, default=300)
 parser.add_argument('--lr', type=float, default=2e-4)
 parser.add_argument('--mode', type=str, default='Original')  # ['Original', 'Two_Stream','FAM','Decoder','CLloss']
@@ -26,7 +26,7 @@ args = parser.parse_args()
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 osenvs = len(os.environ['CUDA_VISIBLE_DEVICES'].split(','))
 compress = args.compress
-dataset_path = '/mnt/sda/FF_plus_plus/result1_{}'.format(compress)
+dataset_path = '../FF_plus_plus_{}'.format(compress)
 pretrained_path = args.pretrained_path
 batch_size = args.bz
 gpu_ids = [*range(osenvs)]

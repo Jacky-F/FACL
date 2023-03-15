@@ -151,16 +151,12 @@ def return_pytorch04_xception(pretrained=True):
     # model = Meso4()
     if pretrained:
         # Load model in torch 0.4+
-        # model.fc = model.last_linear
-        # del model.last_linear
         state_dict = torch.load(
             '/4T/shengming/shengming/FaceForensics/weights/Xception/xception-b5690688.pth')
         for name, weights in state_dict.items():
             if 'pointwise' in name:
                 state_dict[name] = weights.unsqueeze(-1).unsqueeze(-1)
         model.load_state_dict(state_dict)
-        # model.last_linear = model.fc
-        # del model.fc
         model.fc = ClassBlock()
     return model
 
@@ -184,7 +180,6 @@ class Xception(nn.Module):
 
         self.conv2 = nn.Conv2d(32,64,3,bias=False)
         self.bn2 = nn.BatchNorm2d(64)
-        #do relu here
 
         self.block1=Block(64,128,2,2,start_with_relu=False,grow_first=True)
         self.block2=Block(128,256,2,2,start_with_relu=True,grow_first=True)
@@ -205,12 +200,10 @@ class Xception(nn.Module):
         self.conv3 = SeparableConv2d(1024,1536,3,1,1)
         self.bn3 = nn.BatchNorm2d(1536)
 
-        #do relu here
         self.conv4 = SeparableConv2d(1536,2048,3,1,1)
         self.bn4 = nn.BatchNorm2d(2048)
 
         self.fc = nn.Linear(2048, num_classes)
-        # self.fc1 = nn.Linear(3504, num_classes)
         self.dp = nn.Dropout(p=0.2)
         # #------- init weights --------
         # for m in self.modules():
@@ -309,20 +302,9 @@ class Xception(nn.Module):
 
     def forward(self, input):
         x = self.features(input)
-        y,x = self.logits(x)
-        return y,x
-        # low = self.feature_low(input)
-        # mid = self.feature_mid(low)
-        # high = self.feature_high(mid)
-        #
-        # low = F.interpolate(low, size=(10, 10), mode="bilinear", align_corners=True)
-        # mid = F.interpolate(mid, size=(10, 10), mode="bilinear", align_corners=True)
-        # # high = F.interpolate(high, size=(10, 10), mode="bilinear", align_corners=True)
-        # x = torch.cat((low, mid, high), dim=1)  # 728+728+2048=3504
-        # x = self.similarity(x)
-        #
-        # y, x = self.logits(x)
-        # return y,x
+        y, x = self.logits(x)
+        return y, x
+
 
 def get_xception(num_classes=1000, pretrained='imagenet'):
     model = Xception(num_classes=num_classes)
@@ -339,7 +321,6 @@ def get_xception(num_classes=1000, pretrained='imagenet'):
             if 'pointwise' in name:
                 state_dict[name] = weights.unsqueeze(-1).unsqueeze(-1)
         state_dict = {k:v for k, v in state_dict.items() if 'fc' not in k}
-        # print(state_dict)
         model.load_state_dict(state_dict, False)
 
         model.input_space = settings['input_space']
@@ -348,7 +329,6 @@ def get_xception(num_classes=1000, pretrained='imagenet'):
         model.mean = settings['mean']
         model.std = settings['std']
 
-    # TODO: ugly
     model.last_linear = model.fc
     del model.fc
     return model
